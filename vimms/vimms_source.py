@@ -827,12 +827,17 @@ def get_rom_entry_by_uri(uri: str, source_dir: str, include_download_links: bool
                     if size_str:
                         link_name += f" ({size_str})"
                     
+                    # Costruisci l'URL della pagina ROM come intermediate_url
+                    # Questo permetterà al DownloadWorker di visitare la pagina ROM per ottenere cookie e referer
+                    rom_page_url = f'https://vimm.net{uri}'
+                    
                     links.append({
                         'name': link_name,
                         'type': 'direct',
                         'format': format_type,
                         'url': download_url,
-                        'size_str': size_str
+                        'size_str': size_str,
+                        'intermediate_url': rom_page_url  # URL della pagina ROM per cookie e referer
                     })
             
             # Se non ci sono link generati (nessun media array), usa il metodo vecchio
@@ -840,12 +845,15 @@ def get_rom_entry_by_uri(uri: str, source_dir: str, include_download_links: bool
                 download_url = get_rom_download_url(uri)
                 if download_url:
                     format_type = "zip"  # Default
+                    # Costruisci l'URL della pagina ROM come intermediate_url
+                    rom_page_url = f'https://vimm.net{uri}'
                     links.append({
                         'name': 'Download',
                         'type': 'direct',
                         'format': format_type,
                         'url': download_url,
-                        'size_str': None
+                        'size_str': None,
+                        'intermediate_url': rom_page_url  # URL della pagina ROM per cookie e referer
                     })
         
         slug = get_rom_slug_from_uri(uri)

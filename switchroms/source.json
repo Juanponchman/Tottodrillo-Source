@@ -1,18 +1,26 @@
 {
   "id": "switchroms",
   "name": "SwitchRoms",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "type": "python",
   "description": "Sorgente per scaricare ROM Nintendo Switch da SwitchRoms.io",
   "author": "Tottodrillo Team",
   "pythonScript": "switchroms_source.py",
   "dependencies": ["requirements.txt"],
-  "minAppVersion": "3.0.0",
+  "minAppVersion": "3.1.0",
   "baseUrl": "https://switchroms.io",
   "defaultImage": "switchroms/placeholder.png",
   "downloadInterceptPatterns": [
     "sto.romsfast.com",
     "?token="
-  ]
+  ],
+  "requiresCloudflareBypass": false,
+  "webViewConfig": {
+    "delaySeconds": 0,
+    "extractUrlScript": null,
+    "interceptPatterns": ["sto.romsfast.com", "?token="],
+    "requiresCookieExtraction": true
+  },
+  "requiresCustomCookieManager": true
 }
 

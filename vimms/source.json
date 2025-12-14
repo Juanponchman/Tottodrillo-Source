@@ -1,15 +1,24 @@
 {
   "id": "vimms",
   "name": "Vimm's Lair",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "type": "python",
   "description": "Sorgente per scaricare ROM da Vimm's Lair - Database pubblico di ROM per retro gaming",
   "author": "Tottodrillo Team",
   "pythonScript": "vimms_source.py",
   "dependencies": ["requirements.txt"],
-  "minAppVersion": "3.0.0",
+  "minAppVersion": "3.1.0",
   "baseUrl": "https://vimm.net",
   "imageRefererPattern": "https://vimm.net/vault/{id}",
-  "defaultImage": "vimlogo.png"
+  "defaultImage": "vimlogo.png",
+  "requiresCloudflareBypass": false,
+  "requiresCustomCookieManager": false,
+  "requiresSslTrustAll": true,
+  "httpClientConfig": {
+    "requiresSslTrustAll": true,
+    "requiresCookieJar": false,
+    "customHeaders": null,
+    "timeoutSeconds": 30
+  }
 }
 

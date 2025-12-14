@@ -1,13 +1,16 @@
 {
   "id": "crocdb",
   "name": "CrocDB",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Sorgente ufficiale CrocDB - Database pubblico di ROM per retro gaming",
   "author": "Tottodrillo Team",
   "baseUrl": "https://api.crocdb.net",
-  "minAppVersion": "3.0.0",
+  "minAppVersion": "3.1.0",
   "apiPackage": "com.tottodrillo.sources.crocdb",
   "type": "api",
-  "defaultImage": "croc_logo.png"
+  "defaultImage": "croc_logo.png",
+  "requiresCloudflareBypass": false,
+  "requiresCustomCookieManager": false,
+  "requiresSslTrustAll": false
 }
 
