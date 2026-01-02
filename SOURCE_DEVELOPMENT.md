@@ -68,6 +68,8 @@ File di metadata che descrive la sorgente.
 - `mainClass`: Classe principale completa (es. "com.example.MySource") - obbligatorio
 - `dependencies`: Lista di JAR files da includere (opzionale)
 
+**Nota:** Il costruttore della classe principale può ricevere `SourceServices` come terzo parametro (vedi sezione "Servizi Avanzati").
+
 **Per sorgenti Python:**
 - `pythonScript`: Nome dello script Python principale (es. "main.py") - obbligatorio
 - `dependencies`: Lista di file requirements.txt o moduli Python (opzionale)
@@ -80,6 +82,177 @@ File di metadata che descrive la sorgente.
 - `baseUrl`: URL base (solo per sorgenti API, opzionale per altri tipi)
 - `defaultImage`: Percorso relativo dell'immagine placeholder (es. "placeholder.png" o "sourceId/placeholder.png")
 - `downloadInterceptPatterns`: Lista di pattern per intercettare download nel WebView (es. `["download.example.com", "?token=", ".nsp", ".xci"]`)
+
+### Servizi Avanzati (SourceServices)
+
+A partire dalla versione 3.1.0 dell'app, le sorgenti possono richiedere servizi avanzati forniti dall'app tramite il sistema **SourceServices**. Questo permette alle sorgenti di utilizzare funzionalità complesse senza doverle implementare manualmente.
+
+#### Campi per Servizi Avanzati
+
+- `requiresCloudflareBypass`: Se `true`, la sorgente richiede il bypass di Cloudflare tramite WebView
+- `cloudflareBypassConfig`: Configurazione per il bypass Cloudflare (vedi sotto)
+- `webViewConfig`: Configurazione per l'uso del WebView (vedi sotto)
+- `requiresCustomCookieManager`: Se `true`, la sorgente richiede un gestore cookie personalizzato
+- `requiresSslTrustAll`: Se `true`, la sorgente richiede di accettare certificati SSL self-signed
+- `httpClientConfig`: Configurazione per il client HTTP personalizzato (vedi sotto)
+
+#### cloudflareBypassConfig
+
+Configurazione per il bypass di Cloudflare:
+
+```json
+{
+  "delaySeconds": 20,
+  "extractUrlPattern": null,
+  "cookieDomains": ["example.com", "cdn.example.com"]
+}
+```
+
+- `delaySeconds`: Secondi di attesa prima di estrarre l'URL finale (default: 20)
+- `extractUrlPattern`: Pattern regex per estrarre l'URL finale (opzionale)
+- `cookieDomains`: Lista di domini per i quali estrarre i cookie (obbligatorio se `requiresCloudflareBypass` è `true`)
+
+#### webViewConfig
+
+Configurazione per l'uso del WebView:
+
+```json
+{
+  "delaySeconds": 0,
+  "extractUrlScript": null,
+  "interceptPatterns": ["download.example.com", "?token="],
+  "requiresCookieExtraction": true
+}
+```
+
+- `delaySeconds`: Secondi di attesa prima di estrarre l'URL (default: 0)
+- `extractUrlScript`: Script JavaScript personalizzato per estrarre l'URL (opzionale)
+- `interceptPatterns`: Lista di pattern per intercettare download nel WebView
+- `requiresCookieExtraction`: Se `true`, estrae i cookie dal WebView
+
+#### httpClientConfig
+
+Configurazione per il client HTTP personalizzato:
+
+```json
+{
+  "requiresSslTrustAll": true,
+  "requiresCookieJar": false,
+  "customHeaders": null,
+  "timeoutSeconds": 30
+}
+```
+
+- `requiresSslTrustAll`: Se `true`, accetta certificati SSL self-signed
+- `requiresCookieJar`: Se `true`, usa un CookieJar personalizzato
+- `customHeaders`: Headers HTTP personalizzati (opzionale, formato `{"Header-Name": "value"}`)
+- `timeoutSeconds`: Timeout in secondi per le richieste HTTP (default: 30)
+
+#### Esempi di Configurazione
+
+**Sorgente con Cloudflare Bypass (NSWpedia):**
+```json
+{
+  "id": "nswpedia",
+  "name": "NSWpedia",
+  "version": "3.1.0",
+  "type": "python",
+  "requiresCloudflareBypass": true,
+  "cloudflareBypassConfig": {
+    "delaySeconds": 20,
+    "cookieDomains": ["nswpedia.com", "download.nswpediax.site"]
+  },
+  "webViewConfig": {
+    "delaySeconds": 20,
+    "interceptPatterns": ["download.nswpediax.site", "?token="],
+    "requiresCookieExtraction": true
+  },
+  "requiresCustomCookieManager": true
+}
+```
+
+**Sorgente con SSL Trust All (Vimm's Lair):**
+```json
+{
+  "id": "vimms",
+  "name": "Vimm's Lair",
+  "version": "3.1.0",
+  "type": "python",
+  "requiresSslTrustAll": true,
+  "httpClientConfig": {
+    "requiresSslTrustAll": true,
+    "timeoutSeconds": 30
+  }
+}
+```
+
+**Sorgente con WebView per Download (SwitchRoms):**
+```json
+{
+  "id": "switchroms",
+  "name": "SwitchRoms",
+  "version": "3.1.0",
+  "type": "python",
+  "webViewConfig": {
+    "delaySeconds": 0,
+    "interceptPatterns": ["sto.romsfast.com", "?token="],
+    "requiresCookieExtraction": true
+  },
+  "requiresCustomCookieManager": true
+}
+```
+
+#### Utilizzo nei Codice Sorgente
+
+**Per sorgenti Java/Kotlin:**
+
+Il costruttore può ricevere `SourceServices` come terzo parametro:
+
+```java
+import com.tottodrillo.domain.service.SourceServices;
+
+public class MyJavaSource {
+    private SourceServices sourceServices;
+    
+    // Costruttore con SourceServices
+    public MyJavaSource(SourceMetadata metadata, File sourceDir, SourceServices sourceServices) {
+        this.sourceServices = sourceServices;
+        // Usa sourceServices per creare HTTP client, bypass Cloudflare, etc.
+    }
+    
+    // Esempio: crea un HTTP client personalizzato
+    public void example() {
+        HttpClientConfig config = new HttpClientConfig();
+        config.requiresSslTrustAll = true;
+        OkHttpClient client = sourceServices.createHttpClient("mysource", config);
+        // Usa il client per le richieste HTTP
+    }
+}
+```
+
+**Per sorgenti Python:**
+
+I servizi sono disponibili tramite il parametro `source_services_config` passato alla funzione `execute`:
+
+```python
+import json
+
+def execute(params_json: str) -> str:
+    params = json.loads(params_json)
+    source_services_config = params.get("source_services_config")
+    
+    if source_services_config:
+        config = json.loads(source_services_config)
+        # La configurazione contiene le informazioni sui servizi disponibili
+        # Le sorgenti Python usano direttamente requests, ma l'app gestisce
+        # automaticamente Cloudflare bypass, SSL trust all, etc. prima di chiamare Python
+        pass
+    
+    # Implementa la logica della sorgente
+    # L'app gestisce automaticamente i servizi avanzati prima di chiamare Python
+```
+
+**Nota importante:** Per le sorgenti Python, l'app gestisce automaticamente i servizi avanzati (Cloudflare bypass, SSL trust all, cookie management) **prima** di chiamare lo script Python. Lo script Python riceve solo la configurazione per riferimento, ma non deve implementare manualmente questi servizi.
 
 ### Esempi
 
@@ -434,6 +607,7 @@ Le sorgenti Java/Kotlin permettono di eseguire codice personalizzato direttament
 2. **Costruttore**: Può avere:
    - Costruttore senza parametri
    - Costruttore che accetta `(SourceMetadata, File)` - riceve i metadata e la directory della sorgente
+   - Costruttore che accetta `(SourceMetadata, File, SourceServices)` - riceve anche i servizi avanzati (versione 3.1.0+)
 3. **Dipendenze**: I JAR dependencies devono essere inclusi nella cartella `libs/` o nella root del ZIP
 4. **Package**: La classe deve essere nel package specificato in `mainClass`
 
@@ -488,6 +662,14 @@ public class MyJavaSource {
         this.sourceDir = sourceDir;
         // Inizializza qui se necessario
     }
+    
+    // Costruttore alternativo con SourceServices (versione 3.1.0+)
+    // public MyJavaSource(SourceMetadata metadata, File sourceDir, SourceServices sourceServices) {
+    //     this.metadata = metadata;
+    //     this.sourceDir = sourceDir;
+    //     this.sourceServices = sourceServices;
+    //     // Usa sourceServices per creare HTTP client, bypass Cloudflare, etc.
+    // }
     
     // Metodo richiesto: cerca ROM
     public SearchResults searchRoms(
@@ -674,6 +856,9 @@ def execute(params_json: str) -> str:
     
     Args:
         params_json: JSON string con i parametri della richiesta
+        - method: str - Metodo da eseguire ("searchRoms", "getEntry", etc.)
+        - source_dir: str - Percorso alla directory della sorgente
+        - source_services_config: str (opzionale) - JSON string con configurazione SourceServices (versione 3.1.0+)
         
     Returns:
         JSON string con la risposta
@@ -681,6 +866,8 @@ def execute(params_json: str) -> str:
     try:
         params = json.loads(params_json)
         method = params.get("method")
+        source_dir = params.get("source_dir", "")
+        source_services_config = params.get("source_services_config")  # Disponibile dalla versione 3.1.0+
         
         if method == "searchRoms":
             return search_roms(params)

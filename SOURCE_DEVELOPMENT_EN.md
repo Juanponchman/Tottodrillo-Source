@@ -68,6 +68,8 @@ Metadata file that describes the source.
 - `mainClass`: Full main class name (e.g., "com.example.MySource") - required
 - `dependencies`: List of JAR files to include (optional)
 
+**Note:** The main class constructor can receive `SourceServices` as a third parameter (see "Advanced Services" section).
+
 **For Python sources:**
 - `pythonScript`: Main Python script name (e.g., "main.py") - required
 - `dependencies`: List of requirements.txt files or Python modules (optional)
@@ -78,7 +80,180 @@ Metadata file that describes the source.
 - `author`: Author name
 - `minAppVersion`: Minimum app version required (e.g., "1.1.0")
 - `baseUrl`: Base URL (only for API sources, optional for other types)
+- `defaultImage`: Relative path to placeholder image (e.g., "placeholder.png" or "sourceId/placeholder.png")
+- `downloadInterceptPatterns`: List of patterns to intercept downloads in WebView (e.g., `["download.example.com", "?token=", ".nsp", ".xci"]`)
 - `imageRefererPattern`: Pattern for image Referer header (e.g., "https://example.com/vault/{id}")
+
+### Advanced Services (SourceServices)
+
+Starting from app version 3.1.0, sources can request advanced services provided by the app through the **SourceServices** system. This allows sources to use complex functionality without having to implement it manually.
+
+#### Fields for Advanced Services
+
+- `requiresCloudflareBypass`: If `true`, the source requires Cloudflare bypass via WebView
+- `cloudflareBypassConfig`: Configuration for Cloudflare bypass (see below)
+- `webViewConfig`: Configuration for WebView usage (see below)
+- `requiresCustomCookieManager`: If `true`, the source requires a custom cookie manager
+- `requiresSslTrustAll`: If `true`, the source requires accepting self-signed SSL certificates
+- `httpClientConfig`: Configuration for custom HTTP client (see below)
+
+#### cloudflareBypassConfig
+
+Configuration for Cloudflare bypass:
+
+```json
+{
+  "delaySeconds": 20,
+  "extractUrlPattern": null,
+  "cookieDomains": ["example.com", "cdn.example.com"]
+}
+```
+
+- `delaySeconds`: Seconds to wait before extracting final URL (default: 20)
+- `extractUrlPattern`: Regex pattern to extract final URL (optional)
+- `cookieDomains`: List of domains to extract cookies from (required if `requiresCloudflareBypass` is `true`)
+
+#### webViewConfig
+
+Configuration for WebView usage:
+
+```json
+{
+  "delaySeconds": 0,
+  "extractUrlScript": null,
+  "interceptPatterns": ["download.example.com", "?token="],
+  "requiresCookieExtraction": true
+}
+```
+
+- `delaySeconds`: Seconds to wait before extracting URL (default: 0)
+- `extractUrlScript`: Custom JavaScript script to extract URL (optional)
+- `interceptPatterns`: List of patterns to intercept downloads in WebView
+- `requiresCookieExtraction`: If `true`, extracts cookies from WebView
+
+#### httpClientConfig
+
+Configuration for custom HTTP client:
+
+```json
+{
+  "requiresSslTrustAll": true,
+  "requiresCookieJar": false,
+  "customHeaders": null,
+  "timeoutSeconds": 30
+}
+```
+
+- `requiresSslTrustAll`: If `true`, accepts self-signed SSL certificates
+- `requiresCookieJar`: If `true`, uses a custom CookieJar
+- `customHeaders`: Custom HTTP headers (optional, format `{"Header-Name": "value"}`)
+- `timeoutSeconds`: Timeout in seconds for HTTP requests (default: 30)
+
+#### Configuration Examples
+
+**Source with Cloudflare Bypass (NSWpedia):**
+```json
+{
+  "id": "nswpedia",
+  "name": "NSWpedia",
+  "version": "3.1.0",
+  "type": "python",
+  "requiresCloudflareBypass": true,
+  "cloudflareBypassConfig": {
+    "delaySeconds": 20,
+    "cookieDomains": ["nswpedia.com", "download.nswpediax.site"]
+  },
+  "webViewConfig": {
+    "delaySeconds": 20,
+    "interceptPatterns": ["download.nswpediax.site", "?token="],
+    "requiresCookieExtraction": true
+  },
+  "requiresCustomCookieManager": true
+}
+```
+
+**Source with SSL Trust All (Vimm's Lair):**
+```json
+{
+  "id": "vimms",
+  "name": "Vimm's Lair",
+  "version": "3.1.0",
+  "type": "python",
+  "requiresSslTrustAll": true,
+  "httpClientConfig": {
+    "requiresSslTrustAll": true,
+    "timeoutSeconds": 30
+  }
+}
+```
+
+**Source with WebView for Downloads (SwitchRoms):**
+```json
+{
+  "id": "switchroms",
+  "name": "SwitchRoms",
+  "version": "3.1.0",
+  "type": "python",
+  "webViewConfig": {
+    "delaySeconds": 0,
+    "interceptPatterns": ["sto.romsfast.com", "?token="],
+    "requiresCookieExtraction": true
+  },
+  "requiresCustomCookieManager": true
+}
+```
+
+#### Usage in Source Code
+
+**For Java/Kotlin sources:**
+
+The constructor can receive `SourceServices` as a third parameter:
+
+```java
+import com.tottodrillo.domain.service.SourceServices;
+
+public class MyJavaSource {
+    private SourceServices sourceServices;
+    
+    // Constructor with SourceServices
+    public MyJavaSource(SourceMetadata metadata, File sourceDir, SourceServices sourceServices) {
+        this.sourceServices = sourceServices;
+        // Use sourceServices to create HTTP client, bypass Cloudflare, etc.
+    }
+    
+    // Example: create a custom HTTP client
+    public void example() {
+        HttpClientConfig config = new HttpClientConfig();
+        config.requiresSslTrustAll = true;
+        OkHttpClient client = sourceServices.createHttpClient("mysource", config);
+        // Use the client for HTTP requests
+    }
+}
+```
+
+**For Python sources:**
+
+Services are available through the `source_services_config` parameter passed to the `execute` function:
+
+```python
+import json
+
+def execute(params_json: str) -> str:
+    params = json.loads(params_json)
+    source_services_config = params.get("source_services_config")
+    
+    if source_services_config:
+        config = json.loads(source_services_config)
+        # Configuration contains information about available services
+        # Python sources use requests directly, but the app handles
+        # Cloudflare bypass, SSL trust all, etc. automatically before calling Python
+        pass
+    
+    # Implement source logic
+    # The app automatically handles advanced services before calling Python
+```
+
+**Important note:** For Python sources, the app automatically handles advanced services (Cloudflare bypass, SSL trust all, cookie management) **before** calling the Python script. The Python script only receives the configuration for reference, but should not manually implement these services.
 
 ### Examples
 
@@ -431,6 +606,7 @@ Java/Kotlin sources allow you to execute custom code directly in the app. This i
 2. **Constructor**: Can have:
    - No-argument constructor
    - Constructor that accepts `(SourceMetadata, File)` - receives metadata and source directory
+   - Constructor that accepts `(SourceMetadata, File, SourceServices)` - also receives advanced services (version 3.1.0+)
 3. **Dependencies**: JAR dependencies must be included in the `libs/` folder or in the ZIP root
 4. **Package**: The class must be in the package specified in `mainClass`
 
@@ -485,6 +661,14 @@ public class MyJavaSource {
         this.sourceDir = sourceDir;
         // Initialize here if necessary
     }
+    
+    // Alternative constructor with SourceServices (version 3.1.0+)
+    // public MyJavaSource(SourceMetadata metadata, File sourceDir, SourceServices sourceServices) {
+    //     this.metadata = metadata;
+    //     this.sourceDir = sourceDir;
+    //     this.sourceServices = sourceServices;
+    //     // Use sourceServices to create HTTP client, bypass Cloudflare, etc.
+    // }
     
     // Required method: search ROMs
     public SearchResults searchRoms(
@@ -673,6 +857,9 @@ def execute(params_json: str) -> str:
     
     Args:
         params_json: JSON string with request parameters
+        - method: str - Method to execute ("searchRoms", "getEntry", etc.)
+        - source_dir: str - Path to source directory
+        - source_services_config: str (optional) - JSON string with SourceServices configuration (version 3.1.0+)
         
     Returns:
         JSON string with the response
@@ -681,6 +868,7 @@ def execute(params_json: str) -> str:
         params = json.loads(params_json)
         method = params.get("method")
         source_dir = params.get("source_dir", "")
+        source_services_config = params.get("source_services_config")  # Available in version 3.1.0+
         
         if method == "searchRoms":
             return search_roms(params, source_dir)
