@@ -82,6 +82,7 @@ File di metadata che descrive la sorgente.
 - `baseUrl`: URL base (solo per sorgenti API, opzionale per altri tipi)
 - `defaultImage`: Percorso relativo dell'immagine placeholder (es. "placeholder.png" o "sourceId/placeholder.png")
 - `downloadInterceptPatterns`: Lista di pattern per intercettare download nel WebView (es. `["download.example.com", "?token=", ".nsp", ".xci"]`)
+- `imageRefererPattern`: Pattern per costruire il Referer header per le immagini (es. "https://example.com/vault/{id}")
 
 ### Servizi Avanzati (SourceServices)
 

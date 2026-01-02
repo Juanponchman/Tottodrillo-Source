@@ -1199,6 +1199,49 @@ zip -r python-source.zip source.json main.py requirements.txt platform_mapping.j
 - Potentially slower performance
 - Some libraries may not be compatible
 
+## Download Management with WebView
+
+For sites that require JavaScript or anti-bot protections (e.g., Cloudflare), you can configure WebView to handle downloads:
+
+### DownloadLink Parameters
+
+- `requires_webview`: If `true`, the app will open a WebView to handle the download (necessary for sites with Cloudflare or JavaScript)
+- `intermediate_url`: URL of the intermediate page to visit to obtain session cookies (optional)
+- `delay_seconds`: Seconds to wait before starting the download (optional, handled by the app)
+
+### Interception Patterns
+
+In `source.json`, you can define `downloadInterceptPatterns` to specify which URLs the WebView should intercept as direct downloads:
+
+```json
+{
+  "downloadInterceptPatterns": [
+    "download.example.com",
+    "?token=",
+    ".nsp",
+    ".xci",
+    ".zip",
+    ".7z"
+  ]
+}
+```
+
+Patterns are used to recognize when a URL is a direct download that should be intercepted by the WebView.
+
+### DownloadLink Example with WebView
+
+```json
+{
+  "name": "ROM Download (Direct)",
+  "type": "direct",
+  "format": "nsp",
+  "url": "https://download.example.com/ROM.nsp",
+  "requires_webview": true,
+  "delay_seconds": 20,
+  "intermediate_url": "https://example.com/download/rom-123/download_list"
+}
+```
+
 ## Checklist for Creating a Source
 
 - [ ] Decide the source type (API, Java, Python)
@@ -1207,6 +1250,8 @@ zip -r python-source.zip source.json main.py requirements.txt platform_mapping.j
 - [ ] For Java sources: compile code into JAR and include dependencies
 - [ ] For Python sources: create Python script and `requirements.txt` (if necessary)
 - [ ] Create `platform_mapping.json` with platform mappings
+- [ ] If necessary, configure `downloadInterceptPatterns` in `source.json`
+- [ ] For downloads that require WebView, set `requires_webview: true` in links
 - [ ] Test the source locally
 - [ ] Validate the ZIP package with `SourceInstaller.validateZip()`
 - [ ] Create a README.md with instructions
