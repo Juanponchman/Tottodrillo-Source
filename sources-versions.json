@@ -1,14 +1,6 @@
 {
   "sources": [
     {
-      "id": "crocdb",
-      "version": "3.1.0",
-      "downloadUrl": "https://github.com/mccoy88f/Tottodrillo-Source/raw/main/crocdb-source.zip",
-      "changelog": "Aggiornamento architettura SourceServices - App agnostica dalle sorgenti. Richiede app versione 3.1.0 o superiore.",
-      "minAppVersion": "3.1.0",
-      "releaseDate": null
-    },
-    {
       "id": "switchroms",
       "version": "3.1.0",
       "downloadUrl": "https://github.com/mccoy88f/Tottodrillo-Source/raw/main/switchroms-source.zip",
