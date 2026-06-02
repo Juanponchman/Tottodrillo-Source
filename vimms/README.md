@@ -1,54 +1,53 @@
-# Sorgente Vimm's Lair per Tottodrillo
+# Vimm's Lair for Tottodrillo
 
-Questa sorgente permette di cercare e scaricare ROM da Vimm's Lair direttamente da Tottodrillo.
+This source allows you to search and download ROM from Vimm's Lair directly from Tottodrillo.
+Characteristics of the
 
-## Caratteristiche
+    ROM search for specific or general system
+    Support for 35 retro systems
+    Direct download of ROMs
+    Complete integration with Toctodrillo
 
-- ✅ Ricerca ROM per sistema specifico o generale
-- ✅ Supporto per 35 sistemi retro
-- ✅ Download diretto delle ROM
-- ✅ Integrazione completa con Tottodrillo
+Supported systems
 
-## Sistemi Supportati
+    Nintendo : NES, SNES, N64, GameCube, Wii, WiiWare, GB, GBA, GBA, DS, 3DS, Virtual Boy
+    Sega : Genesis, Saturn, Dreamcast, 32X, Sega CD, Master System, Game Gear
+    Sony : PlayStation, PlayStation 2, PlayStation 3, PlayStation Portable
+    Microsoft: Xbox, Xbox 360, Xbox 360 (Digital)
+    Atari : Atari 2600, Atari 5200, Atari 7800, Atari Jaguar, Atari Jaguar CD, Atari Lynx
+    Others : CD-i, TurboGrafx-16, TurboGrafx-CD
 
-- **Nintendo**: NES, SNES, N64, GameCube, Wii, WiiWare, GB, GBC, GBA, DS, 3DS, Virtual Boy
-- **Sega**: Genesis, Saturn, Dreamcast, 32X, Sega CD, Master System, Game Gear
-- **Sony**: PlayStation, PlayStation 2, PlayStation 3, PlayStation Portable
-- **Microsoft**: Xbox, Xbox 360, Xbox 360 (Digital)
-- **Atari**: Atari 2600, Atari 5200, Atari 7800, Atari Jaguar, Atari Jaguar CD, Atari Lynx
-- **Altri**: CD-i, TurboGrafx-16, TurboGrafx-CD
+Installation
 
-## Installazione
+    Install the source via the ZIP file vimms-source.zip
+    The source will be automatically enabled after installation
 
-1. Installa la sorgente tramite il file ZIP `vimms-source.zip`
-2. La sorgente verrà automaticamente abilitata dopo l'installazione
+Use
 
-## Utilizzo
+    Go to the search screen
+    Select a supported platform (optional)
+    Enter the name of the ROM to search
+    Select the ROM from the results
+    Click on the download link to start the download
 
-1. Vai alla schermata di ricerca
-2. Seleziona una piattaforma supportata (opzionale)
-3. Inserisci il nome della ROM da cercare
-4. Seleziona la ROM dai risultati
-5. Clicca sul link di download per avviare il download
+Notes
 
-## Note
+    Downloads are managed directly from the Tottodrillo app
+    Vimm's Lair requires a mediaIdfor each download, which is automatically obtained
+    ROMs are available in ZIP, 7Z, WBFS, RVZ or ISO format depending on platform
 
-- I download vengono gestiti direttamente dall'app Tottodrillo
-- Vimm's Lair richiede un `mediaId` per ogni download, che viene ottenuto automaticamente
-- Le ROM sono disponibili in formato ZIP, 7Z, WBFS, RVZ o ISO a seconda della piattaforma
+Limitations
 
-## Limitazioni
+    The search for slug requires preliminary research (it is not possible to reconstruct the original URI from the slug)
+    Not all ROMs have information about the regions
+    Cover images are loaded lazy (when visible)
 
-- La ricerca per slug richiede una ricerca preliminare (non è possibile ricostruire l'URI originale dallo slug)
-- Non tutte le ROM hanno informazioni sulle regioni
-- Le immagini delle copertine vengono caricate lazy (solo quando visibili)
+Next Versions
 
-## Prossime Versioni
+    The bulk download feature will be removed in the next versions
 
-- ❌ La funzione di bulk download verrà rimossa nelle prossime versioni
+Disclaimer
 
-## Disclaimer
+This source is based on a Python wrapper that integrates Vimm's Lair as the source for Tottodrile. All the merits go to the Vimm's Lair website, a great and important project for the entire retro gaming community.
 
-Questa sorgente si basa su un wrapper Python che integra Vimm's Lair come sorgente per Tottodrillo. **Tutti i meriti vanno al sito Vimm's Lair**, un grande ed importante progetto per tutta la comunità del retro gaming.
-
-**IMPORTANTE**: Le sorgenti funzionano così come sono, **senza garanzie**. Si prega di utilizzarle nel rispetto delle leggi vigenti nel proprio stato. L'utilizzo di ROM è soggetto alle leggi sul copyright del proprio paese. Assicurati di possedere legalmente le copie originali dei giochi prima di scaricare le ROM.
+IMPORTANT: Sources work as they are, without guarantees. Please use them in accordance with the laws in force in your state. The use of ROM is subject to the copyright laws of your country. Make sure you legally own the original copies of the games before downloading the ROMs.
